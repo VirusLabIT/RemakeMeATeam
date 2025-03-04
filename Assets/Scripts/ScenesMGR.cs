@@ -11,7 +11,7 @@ public class ScenesMGR : MonoBehaviour
     {
         get
         {
-            if (instance.TryGetComponent<ScenesMGR>(out ScenesMGR manager))
+            if (instance.TryGetComponent<ScenesMGR>(out _))
             {
                 GameObject sceneManagerObject = new GameObject();
                 instance = sceneManagerObject.AddComponent<ScenesMGR>();
