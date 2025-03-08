@@ -6,7 +6,6 @@ public class ScenesMGR : MonoBehaviour
     // MGR STANDS FOR MANAGER !!!!!
 
     private static ScenesMGR instance;
-
     public static ScenesMGR Instance
     {
         get

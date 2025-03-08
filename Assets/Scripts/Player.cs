@@ -7,8 +7,17 @@ using UnityEngine.SceneManagement;
 
 public class Player : MonoBehaviour
 {
-    private static Player instance;
 
+    public bool CanMove;
+    public float speed;
+
+    public int MaxJumpCount = 2;
+    public int JumpCount = 0;
+    public Camera Maincam;
+
+    public GameObject LastEnemy;
+
+    private static Player instance;
     public static Player Instance
     {
         get
@@ -39,14 +48,6 @@ public class Player : MonoBehaviour
         }
     }
 
-    public bool CanMove;
-    public float speed;
-
-    public int MaxJumpCount = 2;
-    public int JumpCount = 0;
-    public Camera Maincam;
-
-    public GameObject LastEnemy;
     void Start()
     {
 
@@ -93,7 +94,7 @@ public class Player : MonoBehaviour
         if (collision.gameObject.tag == "Enemy")
         { 
             LastEnemy = collision.gameObject;
-            ScenesMGR.Instance.LoadScene("Battle", "SampleScene");
+            ScenesMGR.Instance.LoadScene("Battle", "TestScene");
         }
     }
 
