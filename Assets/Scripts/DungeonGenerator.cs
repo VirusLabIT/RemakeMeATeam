@@ -1,9 +1,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using DelaunatorSharp.Unity.Extensions;
+using DelaunatorSharp;
+using Unity.VisualScripting;
 
 public class DungeonGenerator : MonoBehaviour
 {
+    public List<Vector2> RoomsPos = new List<Vector2>();
     public GameObject[] Rooms;
     public int numberOfRooms;
 
@@ -12,6 +16,7 @@ public class DungeonGenerator : MonoBehaviour
     public float yMaxRandom;
     // Start is called before the first frame update
     void Start()
+    
     {
         List<GameObject> list = Rooms.ToList();
 
@@ -45,12 +50,19 @@ public class DungeonGenerator : MonoBehaviour
                 }
 
             } while (Physics.OverlapBox(spawnedRoom.transform.position, spawnedRoom.transform.localScale / 2, Quaternion.identity).Length > 1);
-
+            RoomsPos.Add(new Vector2(spawnedRoom.transform.position.x, spawnedRoom.transform.position.z));
         }
 
+        
         Debug.Log(rooms.Length);
     }
 
+    private Delaunator delaunay(){
+        Delaunator DN;
+        DN = new Delaunator(RoomsPos.Select(pos => (IPoint)new Point(pos.x, pos.y)).ToArray());
+        return DN;
+
+    }
     // Update is called once per frame
     void Update()
     {
