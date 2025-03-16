@@ -556,7 +556,7 @@ Transform:
   m_GameObject: {fileID: 1599792235}
   serializedVersion: 2
   m_LocalRotation: {x: 0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 10, z: 0}
+  m_LocalPosition: {x: 50, y: 10, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -575,7 +575,61 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxSpeed: 10
-  cameraSpeed: 0.2
+  cameraSpeed: 0
+--- !u!1 &1990980222
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1990980223}
+  - component: {fileID: 1990980224}
+  m_Layer: 0
+  m_Name: Game Manager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1990980223
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1990980222}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1990980224
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1990980222}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 40e465fa5378fa94ca342f93c0428a55, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Rooms:
+  - {fileID: 8438772858026417663, guid: 27abbea4e14ab6b4285fdc0378b4a0c8, type: 3}
+  - {fileID: 2847590488683631723, guid: 21ea8925b8a098f429ae093ab0523313, type: 3}
+  - {fileID: 5902966090977013621, guid: e3989e3b604d4ba428b5d19987090d31, type: 3}
+  - {fileID: 2424177435734113623, guid: d7bfc7c84f55d1d44bdf3c1fefc38573, type: 3}
+  - {fileID: 2676763045235283044, guid: 8104580af65384c4a822333d0c788a7b, type: 3}
+  numberOfRooms: 5
+  xOffset: 50
+  xMaxRandom: 5
+  yMaxRandom: 10
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -584,3 +638,4 @@ SceneRoots:
   - {fileID: 1362363672}
   - {fileID: 1121782893}
   - {fileID: 336498416}
+  - {fileID: 1990980223}
