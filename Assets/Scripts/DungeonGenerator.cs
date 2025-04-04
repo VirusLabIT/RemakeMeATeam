@@ -1,12 +1,15 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using DelaunatorSharp.Unity.Extensions;
 using DelaunatorSharp;
 using Unity.VisualScripting;
+using UnityEngine.AI;
+using Unity.AI.Navigation;
 
 public class DungeonGenerator : MonoBehaviour
 {
+    public NavMeshSurface surface;
     public List<Vector2> RoomsPos = new List<Vector2>();
     public GameObject[] Rooms;
     public int numberOfRooms;
@@ -18,6 +21,7 @@ public class DungeonGenerator : MonoBehaviour
     void Start()
     
     {
+        surface = GetComponent<NavMeshSurface>();
         List<GameObject> list = Rooms.ToList();
 
         // THIS IS TEMPORARY, I MADE IT TO DEBUG WHAT, AND HOW MANY ROOMS SPAWN
@@ -25,7 +29,7 @@ public class DungeonGenerator : MonoBehaviour
 
         for (int i = 0; i < numberOfRooms; i++)
         {
-            int randomNumber = Random.Range(0, list.Count);
+            int randomNumber = UnityEngine.Random.Range(0, list.Count);
             rooms[i] = list[randomNumber];
 
             GameObject spawnedRoom = null;
@@ -39,7 +43,7 @@ public class DungeonGenerator : MonoBehaviour
                 {
                     Destroy(spawnedRoom);
                 }
-                spawnedRoom = Instantiate(rooms[i], new Vector3(Random.Range(-xMaxRandom, xMaxRandom) + xOffset, 0, Random.Range(-yMaxRandom, yMaxRandom)), Quaternion.identity);
+                spawnedRoom = Instantiate(rooms[i], new Vector3(UnityEngine.Random.Range(-xMaxRandom, xMaxRandom) + xOffset, 0, UnityEngine.Random.Range(-yMaxRandom, yMaxRandom)), Quaternion.identity);
                 tries++;
 
                 if(tries % 50 == 0 && tries != 0)
@@ -55,17 +59,27 @@ public class DungeonGenerator : MonoBehaviour
 
         
         Debug.Log(rooms.Length);
+        surface.BuildNavMesh();
     }
 
-    private Delaunator delaunay(){
-        Delaunator DN;
-        DN = new Delaunator(RoomsPos.Select(pos => (IPoint)new Point(pos.x, pos.y)).ToArray());
-        return DN;
-
-    }
-    // Update is called once per frame
     void Update()
     {
+        
+    }
 
+    private void OnDrawGizmos()
+    {   
+        //this draws the lines between the rooms, it just help you to visualize the connections, if you tought otherwise, fuck you
+        if (RoomsPos.Count >= 3){
+        var MST = MSTBuilder.BuildMST(RoomsPos.Select(pos => (IPoint)new Point(pos.x, pos.y)).ToArray());
+        foreach (var edge in MST)
+        {
+            Vector2 u = RoomsPos[edge.U];
+            Vector2 v = RoomsPos[edge.V];
+            Gizmos.color = Color.green;
+            Gizmos.DrawLine(new Vector3(u.x, 0, u.y), new Vector3(v.x, 0, v.y));
+        }
+        }
     }
 }
+
