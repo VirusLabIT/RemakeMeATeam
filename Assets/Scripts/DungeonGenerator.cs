@@ -15,8 +15,8 @@ public class DungeonGenerator : MonoBehaviour
     public int numberOfRooms;
 
     public float xOffset;
-    public float xMaxRandom;
-    public float yMaxRandom;
+    public int xMaxRandom;
+    public int yMaxRandom;
     // Start is called before the first frame update
     void Start()
     
