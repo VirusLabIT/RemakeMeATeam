@@ -12,6 +12,8 @@ public class DungeonGenerator : MonoBehaviour
     public LayerMask LayerToCheck;
     public NavMeshSurface surface;
     public List<Vector2> RoomsPos = new List<Vector2>();
+    public List<GameObject> Doors;
+    public List<Vector2> DoorsPos;
     public GameObject[] Rooms;
     public int numberOfRooms;
 
@@ -59,10 +61,24 @@ public class DungeonGenerator : MonoBehaviour
 
         
         Debug.Log(rooms.Length);
+        foreach (var room in rooms)
+        {
+            foreach (Transform child in room.transform)
+                {
+                    if (child.gameObject.layer == LayerMask.NameToLayer("Door"))
+                    {
+                        // Add the child GameObject to the list
+                        Doors.Add(child.gameObject);
+                        DoorsPos.Add(new Vector2(child.transform.position.x, child.transform.position.z));
+                        Debug.Log($"DOOR FOUND AT: {child.transform.position}");
+                    }
+                 }
+
+        }
         surface.BuildNavMesh();
     }
 
-    private void OnDrawGizmos()
+     private void OnDrawGizmos()
     {   
         //this draws the lines between the rooms, it just help you to visualize the connections, if you tought otherwise, fuck you
         if (RoomsPos.Count >= 3){
