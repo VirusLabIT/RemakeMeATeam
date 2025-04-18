@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 5318267791909504002}
   - component: {fileID: 2529440154110804016}
   - component: {fileID: 1248772933360632993}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Room1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -157,6 +157,10 @@ PrefabInstance:
     - target: {fileID: 8946068539652508941, guid: 71e10679423c4d14f925437940c2a99b, type: 3}
       propertyPath: m_Name
       value: Door
+      objectReference: {fileID: 0}
+    - target: {fileID: 8946068539652508941, guid: 71e10679423c4d14f925437940c2a99b, type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

@@ -9,6 +9,7 @@ using Unity.AI.Navigation;
 
 public class DungeonGenerator : MonoBehaviour
 {
+    public LayerMask LayerToCheck;
     public NavMeshSurface surface;
     public List<Vector2> RoomsPos = new List<Vector2>();
     public GameObject[] Rooms;
@@ -18,8 +19,7 @@ public class DungeonGenerator : MonoBehaviour
     public int xMaxRandom;
     public int yMaxRandom;
     // Start is called before the first frame update
-    void Start()
-    
+    void Start()   
     {
         surface = GetComponent<NavMeshSurface>();
         List<GameObject> list = Rooms.ToList();
@@ -46,25 +46,20 @@ public class DungeonGenerator : MonoBehaviour
                 spawnedRoom = Instantiate(rooms[i], new Vector3(UnityEngine.Random.Range(-xMaxRandom, xMaxRandom) + xOffset, 0, UnityEngine.Random.Range(-yMaxRandom, yMaxRandom)), Quaternion.identity);
                 tries++;
 
-                if(tries % 50 == 0 && tries != 0)
+                if (tries % 50 == 0 && tries != 0)
                 {
                     Debug.Log("CANT SPAWN A ROOM. CHANGING MAX RANDOM VALUES");
                     xMaxRandom += 5;
                     yMaxRandom += 5;
                 }
 
-            } while (Physics.OverlapBox(spawnedRoom.transform.position, spawnedRoom.transform.localScale / 2, Quaternion.identity).Length > 1);
+            } while (Physics.OverlapBox(spawnedRoom.transform.position, spawnedRoom.transform.localScale / 2, Quaternion.identity, LayerToCheck).Length > 1);
             RoomsPos.Add(new Vector2(spawnedRoom.transform.position.x, spawnedRoom.transform.position.z));
         }
 
         
         Debug.Log(rooms.Length);
         surface.BuildNavMesh();
-    }
-
-    void Update()
-    {
-        
     }
 
     private void OnDrawGizmos()
