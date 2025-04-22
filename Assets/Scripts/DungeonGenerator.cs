@@ -40,7 +40,7 @@ public class DungeonGenerator : MonoBehaviour
             int tries = 0;
             do
             {
-                Debug.Log($"ATTEMPING TO SPAWN A ROOM. TRIES: {tries}");
+               Debug.Log($"ATTEMPING TO SPAWN A ROOM. TRIES: {tries}");
                 if (spawnedRoom != null)
                 {
                     Destroy(spawnedRoom);
@@ -68,9 +68,12 @@ public class DungeonGenerator : MonoBehaviour
                     if (child.gameObject.layer == LayerMask.NameToLayer("Door"))
                     {
                         // Add the child GameObject to the list
-                        Doors.Add(child.gameObject);
-                        DoorsPos.Add(new Vector2(child.transform.position.x, child.transform.position.z));
-                        Debug.Log($"DOOR FOUND AT: {child.transform.position}");
+                        Transform doorTransform = child.transform;
+                        GameObject door = child.gameObject;
+                        Vector3 DoorPos = room.transform.TransformPoint(doorTransform.localPosition);
+                        Doors.Add(door);
+                        DoorsPos.Add(new Vector2(DoorPos.x, DoorPos.z));
+                        Debug.Log($"DOOR FOUND AT: {DoorPos}");
                     }
                  }
 
@@ -78,9 +81,12 @@ public class DungeonGenerator : MonoBehaviour
         surface.BuildNavMesh();
     }
 
+    
+
      private void OnDrawGizmos()
     {   
-        //this draws the lines between the rooms, it just help you to visualize the connections, if you tought otherwise, fuck you
+        
+        /*//this draws the lines between the rooms, it just help you to visualize the connections, if you tought otherwise, fuck you
         if (RoomsPos.Count >= 3){
         var MST = MSTBuilder.BuildMST(RoomsPos.Select(pos => (IPoint)new Point(pos.x, pos.y)).ToArray());
         foreach (var edge in MST)
@@ -91,6 +97,71 @@ public class DungeonGenerator : MonoBehaviour
             Gizmos.DrawLine(new Vector3(u.x, 0, u.y), new Vector3(v.x, 0, v.y));
         }
         }
+        */
+
+        var edges = ConnectDoors();   
+        foreach (var edge in edges)
+        {
+            Vector2 u = DoorsPos[edge.U];
+            Vector2 v = DoorsPos[edge.V];
+            Debug.Log(u);
+            Debug.Log(v);
+            Gizmos.color = Color.blue;
+            Gizmos.DrawLine(new Vector3(u.x, 0, u.y), new Vector3(v.x, 0, v.y));
+        }
+
     }
+
+    //Fuck you TheRKey
+    private List<Edge> ConnectDoors(bool debug = false)
+    {
+        List<Edge> edges = new List<Edge>{};
+        Dictionary<GameObject, GameObject> door2Room = new Dictionary<GameObject, GameObject>();
+
+        // Each Door With its room
+        foreach (var room in Rooms)
+        {
+            foreach (Transform child in room.transform)
+            {
+                if (child.gameObject.layer == LayerMask.NameToLayer("Door"))
+                {
+                    door2Room[child.gameObject] = room;
+                }
+            }
+        }
+
+        // Connect each door to the nearest door in a different room
+        foreach (var door in Doors)
+        {
+            Vector2 doorPos = new Vector2(door.transform.position.x, door.transform.position.z);
+            GameObject closestDoor = null;
+            List<float> distances = new List<float>{};
+
+            foreach (var otherDoor in Doors)
+            {
+                if (door == otherDoor) continue; // Skip the same door
+                if (door2Room[door] == door2Room[otherDoor]) continue; // Skip doors in the same room
+
+                Vector2 otherDoorPos = new Vector2(otherDoor.transform.position.x, otherDoor.transform.position.z);
+                distances.Add(Vector2.Distance(doorPos, otherDoorPos));
+            }
+            if (debug == true){Debug.Log($"Distances: {distances.Count}");}
+
+            if (closestDoor == null && distances.Count != 0)
+            {
+                closestDoor = Doors[distances.IndexOf(distances.Min())];
+                if (debug == true){Debug.Log($"Closest Door: {closestDoor.transform.position}");}
+            }
+
+            if(debug == true){Debug.Log(DoorsPos.FindIndex(pos => pos == new Vector2(door.transform.position.x, door.transform.position.z)));}
+            //Debug.Log(DoorsPos.FindIndex(pos => pos == new Vector2(closestDoor.transform.position.x, closestDoor.transform.position.z)));
+                //add to "edges" the INDEX OF POSITIONS OF THE DOORS IN DOORSPOS
+            edges.Add(new Edge(DoorsPos.FindIndex(pos => pos == new Vector2(door.transform.position.x, door.transform.position.z)), DoorsPos.FindIndex(pos => pos == new Vector2(closestDoor.transform.position.x, closestDoor.transform.position.z)), Vector2.Distance(doorPos, new Vector2(closestDoor.transform.position.x, closestDoor.transform.position.z))));
+            if (debug== true){Debug.Log(edges.Count);}
+            
+        }
+        return edges;
+    }
+
 }
 
