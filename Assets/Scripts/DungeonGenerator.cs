@@ -6,6 +6,7 @@ using DelaunatorSharp;
 using Unity.VisualScripting;
 using UnityEngine.AI;
 using Unity.AI.Navigation;
+using System.Collections;
 
 public class DungeonGenerator : MonoBehaviour
 {
@@ -61,32 +62,49 @@ public class DungeonGenerator : MonoBehaviour
 
         
         Debug.Log(rooms.Length);
-        foreach (var room in rooms)
+        
+        surface.BuildNavMesh();
+
+        StartCoroutine(FindDoors());
+    }
+
+    private IEnumerator FindDoors(){
+        yield return new WaitForSeconds(0.3f);
+
+        Door[] myItems = FindObjectsOfType(typeof(Door)) as Door[];
+            Debug.Log ("Found " + myItems.Length + " instances with this script attached");
+            foreach(Door item in myItems)
+            {
+                DoorsPos.Add(new Vector2(item.gameObject.transform.position.x, item.gameObject.transform.position.z));
+                Doors.Add(item.gameObject);
+            }
+
+        /*foreach (var room in Rooms)
         {
             foreach (Transform child in room.transform)
+            {
+                if (child.gameObject.layer == LayerMask.NameToLayer("Door"))
                 {
-                    if (child.gameObject.layer == LayerMask.NameToLayer("Door"))
-                    {
-                        // Add the child GameObject to the list
-                        Transform doorTransform = child.transform;
-                        GameObject door = child.gameObject;
-                        Vector3 DoorPos = room.transform.TransformPoint(doorTransform.localPosition);
-                        Doors.Add(door);
-                        DoorsPos.Add(new Vector2(DoorPos.x, DoorPos.z));
-                        Debug.Log($"DOOR FOUND AT: {DoorPos}");
-                    }
-                 }
-
+                    // Add the child GameObject to the list
+                    Transform doorTransform = child.transform;
+                    GameObject door = child.gameObject;
+                    Vector3 DoorPos = room.transform.TransformPoint(doorTransform.localPosition);
+                    Vector3 worldPos = child.parent.localToWorldMatrix.MultiplyPoint(child.localPosition);
+                    Doors.Add(door);
+                    DoorsPos.Add(new Vector2(DoorPos.x, DoorPos.z));
+                    Debug.Log($"DOOR FOUND AT: {worldPos}");
+                }
+            }
         }
-        surface.BuildNavMesh();
+        */
     }
 
     
-
+    
      private void OnDrawGizmos()
     {   
         
-        /*//this draws the lines between the rooms, it just help you to visualize the connections, if you tought otherwise, fuck you
+        //this draws the lines between the rooms, it just help you to visualize the connections, if you tought otherwise, fuck you
         if (RoomsPos.Count >= 3){
         var MST = MSTBuilder.BuildMST(RoomsPos.Select(pos => (IPoint)new Point(pos.x, pos.y)).ToArray());
         foreach (var edge in MST)
@@ -97,38 +115,24 @@ public class DungeonGenerator : MonoBehaviour
             Gizmos.DrawLine(new Vector3(u.x, 0, u.y), new Vector3(v.x, 0, v.y));
         }
         }
-        */
+        
 
         var edges = ConnectDoors();   
         foreach (var edge in edges)
         {
             Vector2 u = DoorsPos[edge.U];
             Vector2 v = DoorsPos[edge.V];
-            Debug.Log(u);
-            Debug.Log(v);
+
             Gizmos.color = Color.blue;
             Gizmos.DrawLine(new Vector3(u.x, 0, u.y), new Vector3(v.x, 0, v.y));
         }
-
+        
     }
 
     //Fuck you TheRKey
     private List<Edge> ConnectDoors(bool debug = false)
     {
         List<Edge> edges = new List<Edge>{};
-        Dictionary<GameObject, GameObject> door2Room = new Dictionary<GameObject, GameObject>();
-
-        // Each Door With its room
-        foreach (var room in Rooms)
-        {
-            foreach (Transform child in room.transform)
-            {
-                if (child.gameObject.layer == LayerMask.NameToLayer("Door"))
-                {
-                    door2Room[child.gameObject] = room;
-                }
-            }
-        }
 
         // Connect each door to the nearest door in a different room
         foreach (var door in Doors)
@@ -140,7 +144,7 @@ public class DungeonGenerator : MonoBehaviour
             foreach (var otherDoor in Doors)
             {
                 if (door == otherDoor) continue; // Skip the same door
-                if (door2Room[door] == door2Room[otherDoor]) continue; // Skip doors in the same room
+                if (door.transform.parent.gameObject == otherDoor.transform.parent.gameObject) continue; // Skip doors in the same room
 
                 Vector2 otherDoorPos = new Vector2(otherDoor.transform.position.x, otherDoor.transform.position.z);
                 distances.Add(Vector2.Distance(doorPos, otherDoorPos));

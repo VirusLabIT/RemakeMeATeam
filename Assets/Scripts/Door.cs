@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor.Experimental.GraphView;
+using UnityEditor.UI;
 using UnityEngine;
 
 public class Door : MonoBehaviour
@@ -14,5 +15,7 @@ public class Door : MonoBehaviour
 
         //DirectionVisualizer.SetActive(false);
         //$Remove Comment above to hide the visualizer 
+        Debug.Log(transform.position);
+        
     }
 }
