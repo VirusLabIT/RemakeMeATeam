@@ -24,6 +24,15 @@ public class DungeonGenerator : MonoBehaviour
     // Start is called before the first frame update
     void Start()   
     {
+        MakeRooms();
+        
+        surface.BuildNavMesh();
+
+        StartCoroutine(FindDoors());
+    }
+
+    public void MakeRooms()
+    {
         surface = GetComponent<NavMeshSurface>();
         List<GameObject> list = Rooms.ToList();
 
@@ -41,7 +50,7 @@ public class DungeonGenerator : MonoBehaviour
             int tries = 0;
             do
             {
-               Debug.Log($"ATTEMPING TO SPAWN A ROOM. TRIES: {tries}");
+                Debug.Log($"ATTEMPING TO SPAWN A ROOM. TRIES: {tries}");
                 if (spawnedRoom != null)
                 {
                     Destroy(spawnedRoom);
@@ -60,12 +69,8 @@ public class DungeonGenerator : MonoBehaviour
             RoomsPos.Add(new Vector2(spawnedRoom.transform.position.x, spawnedRoom.transform.position.z));
         }
 
-        
-        Debug.Log(rooms.Length);
-        
-        surface.BuildNavMesh();
 
-        StartCoroutine(FindDoors());
+        Debug.Log(rooms.Length);
     }
 
     private IEnumerator FindDoors(){
@@ -145,6 +150,8 @@ public class DungeonGenerator : MonoBehaviour
             {
                 if (door == otherDoor) continue; // Skip the same door
                 if (door.transform.parent.gameObject == otherDoor.transform.parent.gameObject) continue; // Skip doors in the same room
+                if (door.GetComponent<Door>().isConnected || otherDoor.GetComponent<Door>().isConnected) continue; // if the door is connected already, skip
+
 
                 Vector2 otherDoorPos = new Vector2(otherDoor.transform.position.x, otherDoor.transform.position.z);
                 distances.Add(Vector2.Distance(doorPos, otherDoorPos));
@@ -158,11 +165,16 @@ public class DungeonGenerator : MonoBehaviour
             }
 
             if(debug == true){Debug.Log(DoorsPos.FindIndex(pos => pos == new Vector2(door.transform.position.x, door.transform.position.z)));}
-            //Debug.Log(DoorsPos.FindIndex(pos => pos == new Vector2(closestDoor.transform.position.x, closestDoor.transform.position.z)));
-                //add to "edges" the INDEX OF POSITIONS OF THE DOORS IN DOORSPOS
+       
+
+            //add to "edges" the INDEX OF POSITIONS OF THE DOORS IN DOORSPOS
             edges.Add(new Edge(DoorsPos.FindIndex(pos => pos == new Vector2(door.transform.position.x, door.transform.position.z)), DoorsPos.FindIndex(pos => pos == new Vector2(closestDoor.transform.position.x, closestDoor.transform.position.z)), Vector2.Distance(doorPos, new Vector2(closestDoor.transform.position.x, closestDoor.transform.position.z))));
             if (debug== true){Debug.Log(edges.Count);}
-            
+
+
+            door.GetComponent<Door>().isConnected = true;
+            closestDoor.GetComponent<Door>().isConnected = true;
+
         }
         return edges;
     }

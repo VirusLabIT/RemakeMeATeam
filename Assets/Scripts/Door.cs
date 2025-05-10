@@ -6,6 +6,9 @@ using UnityEngine;
 
 public class Door : MonoBehaviour
 {
+    // Later hide it in the inspector, just for debugging purposes :]
+    public bool isConnected = false;
+
     public GameObject DirectionVisualizer;
     public Vector2 Direction;
     // Start is called before the first frame update
