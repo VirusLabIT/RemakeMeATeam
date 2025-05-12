@@ -10,9 +10,11 @@ using System.Collections;
 
 public class DungeonGenerator : MonoBehaviour
 {
+
+    public List<Edge> doorsConnections = new();
     public LayerMask LayerToCheck;
     public NavMeshSurface surface;
-    public List<Vector2> RoomsPos = new List<Vector2>();
+    public List<Vector2> RoomsPos = new();
     public List<GameObject> Doors;
     public List<Vector2> DoorsPos;
     public GameObject[] Rooms;
@@ -21,7 +23,7 @@ public class DungeonGenerator : MonoBehaviour
     public float xOffset;
     public int xMaxRandom;
     public int yMaxRandom;
-    // Start is called before the first frame update
+ // Start is called before the first frame update
     void Start()   
     {
         MakeRooms();
@@ -29,6 +31,7 @@ public class DungeonGenerator : MonoBehaviour
         surface.BuildNavMesh();
 
         StartCoroutine(FindDoors());
+
     }
 
     public void MakeRooms()
@@ -84,6 +87,11 @@ public class DungeonGenerator : MonoBehaviour
                 Doors.Add(item.gameObject);
             }
 
+    
+        yield return new WaitForSeconds(0.3f);
+
+        doorsConnections = ConnectDoors(true);
+
         /*foreach (var room in Rooms)
         {
             foreach (Transform child in room.transform)
@@ -122,8 +130,7 @@ public class DungeonGenerator : MonoBehaviour
         }
         
 
-        var edges = ConnectDoors();   
-        foreach (var edge in edges)
+        foreach (var edge in doorsConnections)
         {
             Vector2 u = DoorsPos[edge.U];
             Vector2 v = DoorsPos[edge.V];
@@ -137,44 +144,53 @@ public class DungeonGenerator : MonoBehaviour
     //Fuck you TheRKey
     private List<Edge> ConnectDoors(bool debug = false)
     {
-        List<Edge> edges = new List<Edge>{};
+        List<Edge> edges = new();
 
         // Connect each door to the nearest door in a different room
+        HashSet<GameObject> connectedDoors = new();
+
         foreach (var door in Doors)
         {
-            Vector2 doorPos = new Vector2(door.transform.position.x, door.transform.position.z);
+            if (connectedDoors.Contains(door)) continue; // Skip if already connected
+
+            Vector2 doorPos = new(door.transform.position.x, door.transform.position.z);
             GameObject closestDoor = null;
-            List<float> distances = new List<float>{};
+            float minDistance = float.MaxValue;
 
             foreach (var otherDoor in Doors)
             {
-                if (door == otherDoor) continue; // Skip the same door
-                if (door.transform.parent.gameObject == otherDoor.transform.parent.gameObject) continue; // Skip doors in the same room
-                if (door.GetComponent<Door>().isConnected || otherDoor.GetComponent<Door>().isConnected) continue; // if the door is connected already, skip
+                if (door == otherDoor ||
+                    door.transform.parent.gameObject == otherDoor.transform.parent.gameObject ||
+                    connectedDoors.Contains(otherDoor))
+                    continue; // Skip if needed
 
-
-                Vector2 otherDoorPos = new Vector2(otherDoor.transform.position.x, otherDoor.transform.position.z);
-                distances.Add(Vector2.Distance(doorPos, otherDoorPos));
+                Vector2 otherDoorPos = new(otherDoor.transform.position.x, otherDoor.transform.position.z);
+                float distance = Vector2.Distance(doorPos, otherDoorPos);
+                if (distance < minDistance)
+                {
+                    minDistance = distance;
+                    closestDoor = otherDoor;
+                }
             }
-            if (debug == true){Debug.Log($"Distances: {distances.Count}");}
 
-            if (closestDoor == null && distances.Count != 0)
+            if (closestDoor != null)
             {
-                closestDoor = Doors[distances.IndexOf(distances.Min())];
-                if (debug == true){Debug.Log($"Closest Door: {closestDoor.transform.position}");}
+                connectedDoors.Add(door);
+                connectedDoors.Add(closestDoor);
+
+                //add to "edges" the INDEX OF POSITIONS OF THE DOORS IN DOORSPOS
+                edges.Add(new Edge(
+                    DoorsPos.FindIndex(pos => pos == new Vector2(door.transform.position.x, door.transform.position.z)),
+                    DoorsPos.FindIndex(pos => pos == new Vector2(closestDoor.transform.position.x, closestDoor.transform.position.z)),
+                    Vector2.Distance(doorPos, new Vector2(closestDoor.transform.position.x, closestDoor.transform.position.z))
+                ));
+
+                if (debug == true)
+                {
+                    Debug.Log($"Door {door.transform.position} connected to {closestDoor.transform.position}");
+                    Debug.Log(edges.Count);
+                }
             }
-
-            if(debug == true){Debug.Log(DoorsPos.FindIndex(pos => pos == new Vector2(door.transform.position.x, door.transform.position.z)));}
-       
-
-            //add to "edges" the INDEX OF POSITIONS OF THE DOORS IN DOORSPOS
-            edges.Add(new Edge(DoorsPos.FindIndex(pos => pos == new Vector2(door.transform.position.x, door.transform.position.z)), DoorsPos.FindIndex(pos => pos == new Vector2(closestDoor.transform.position.x, closestDoor.transform.position.z)), Vector2.Distance(doorPos, new Vector2(closestDoor.transform.position.x, closestDoor.transform.position.z))));
-            if (debug== true){Debug.Log(edges.Count);}
-
-
-            door.GetComponent<Door>().isConnected = true;
-            closestDoor.GetComponent<Door>().isConnected = true;
-
         }
         return edges;
     }
